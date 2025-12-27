@@ -19,6 +19,9 @@ npx expo start --web
 # Lint
 npm run lint
 
+# Format code
+npm run format
+
 # Reset to blank project (moves starter code to app-example/)
 npm run reset-project
 ```
@@ -26,6 +29,19 @@ npm run reset-project
 ## Architecture
 
 This is an Expo SDK 54 project using React Native 0.81 with file-based routing via expo-router.
+
+### Tech Stack
+
+- **Core**: Expo SDK 54, React Native 0.81, React 19.1, TypeScript 5.9
+- **Routing**: expo-router (file-based routing with typed routes)
+- **Styling**: NativeWind 4.2 + Tailwind CSS 3.4
+- **State Management**: Zustand 5.0 + AsyncStorage (persistent storage)
+- **Lists**: @shopify/flash-list 2.0 (high-performance list component)
+- **Images**: expo-image (blurhash placeholders, caching, transitions)
+- **i18n**: i18n-js + expo-localization
+- **Navigation**: React Navigation 7
+- **Animation**: react-native-reanimated, react-native-gesture-handler
+- **Dev Tools**: ESLint, Prettier, Lefthook (Git hooks)
 
 ### Directory Structure
 
@@ -37,7 +53,14 @@ src/
 ├── components/    # React components
 │   └── ui/        # UI primitives (icons, collapsible, etc.)
 ├── constants/     # Theme, colors, fonts
-└── hooks/         # Custom React hooks
+│   └── theme.ts   # Design system configuration
+├── hooks/         # Custom React hooks
+├── lib/           # Library configurations
+│   └── i18n.ts    # Internationalization setup
+├── locales/       # Translation files (en.ts, ja.ts)
+└── stores/        # Zustand stores
+    ├── app-store.ts     # App-wide state (initialization, user, loading)
+    └── counter-store.ts # Example store with persistence
 ```
 
 ### Routing Structure
@@ -56,6 +79,7 @@ src/
 ```typescript
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAppStore } from '@/stores';
 ```
 
 **Platform-specific files**: Use `.ios.tsx` / `.android.tsx` / `.web.ts` suffixes
@@ -64,16 +88,108 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 - `components/ui/icon-symbol.tsx` (fallback) uses MaterialIcons
 - `hooks/use-color-scheme.web.ts` vs `hooks/use-color-scheme.ts`
 
+**NativeWind Styling**: Use Tailwind CSS classes with NativeWind
+
+```tsx
+<View className="rounded-lg bg-background-card p-5 shadow-sm">
+  <Text className="font-serif text-h2 text-foreground-heading">Title</Text>
+</View>
+```
+
+**Zustand State Management**: Use individual selectors for performance
+
+```tsx
+// Good: Individual selectors
+const count = useCounterStore((state) => state.count);
+const increment = useCounterStore((state) => state.increment);
+
+// With persistence via AsyncStorage
+export const useCounterStore = create<CounterStore>()(
+  devtools(
+    persist(
+      (set) => ({
+        /* ... */
+      }),
+      {
+        name: 'counter-storage',
+        storage: createJSONStorage(() => AsyncStorage),
+      }
+    )
+  )
+);
+```
+
 **Theming**: Color scheme handling flows through:
 
 1. `src/hooks/use-color-scheme.ts` - detects system preference
 2. `src/hooks/use-theme-color.ts` - resolves colors from theme
-3. `src/constants/theme.ts` - defines `Colors` (light/dark) and `Fonts` (per-platform)
+3. `src/constants/theme.ts` - defines `Colors` (light/dark), `Fonts`, `Spacing`, etc.
+4. `tailwind.config.js` - CSS variables for NativeWind
+5. `global.css` - Base styles and utility classes
+
+**Internationalization (i18n)**:
+
+```tsx
+import { useTranslation } from '@/hooks/use-translation';
+
+function Component() {
+  const { t, locale, setLocale } = useTranslation();
+  return <Text>{t('home.welcome')}</Text>;
+}
+```
+
+Supported locales: `en`, `ja`
 
 **Themed components**: `ThemedText` and `ThemedView` wrap native components with automatic dark/light mode support.
+
+**FlashList**: High-performance list component (drop-in replacement for FlatList)
+
+```tsx
+import { FlashList } from '@shopify/flash-list';
+
+<FlashList
+  data={items}
+  renderItem={({ item }) => <ItemComponent item={item} />}
+  estimatedItemSize={200}
+  keyExtractor={(item) => item.id}
+/>;
+```
+
+**expo-image**: High-performance image with blurhash placeholders
+
+```tsx
+import { Image } from 'expo-image';
+
+<Image
+  source={{ uri: 'https://example.com/photo.jpg' }}
+  placeholder={{ blurhash: '|rF?hV%2WCj[ayj[...' }}
+  contentFit="cover"
+  transition={300}
+  style={{ width: 100, height: 100 }}
+/>;
+```
 
 ### Enabled Experiments
 
 - `typedRoutes`: Type-safe routing
 - `reactCompiler`: React Compiler enabled
 - `newArchEnabled`: React Native New Architecture
+
+### Design System
+
+This project uses an Anthropic-inspired design system:
+
+- **Brand Color**: Terra Cotta (#da7756)
+- **Typography**: Serif fonts prioritized for scholarly impression
+- **Theming**: Light/Dark mode with CSS variables
+
+See `.claude/rules/design-system-rule.md` for detailed guidelines.
+
+### Rules
+
+Additional development rules are located in `.claude/rules/`:
+
+- `design-system-rule.md` - Color palette, typography, spacing, components
+- `state-management-rule.md` - Zustand patterns and best practices
+- `i18n-rule.md` - Internationalization guidelines
+- `styling-rule.md` - NativeWind/Tailwind styling conventions
