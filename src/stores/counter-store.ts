@@ -1,5 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/shallow';
 
 // State interface
@@ -25,7 +26,7 @@ const initialState: CounterState = {
 };
 
 /**
- * Counter Store - A simple example store demonstrating Zustand usage
+ * Counter Store - A simple example store demonstrating Zustand usage with persistence
  *
  * Usage:
  * ```tsx
@@ -43,20 +44,28 @@ const initialState: CounterState = {
  */
 export const useCounterStore = create<CounterStore>()(
   devtools(
-    (set) => ({
-      ...initialState,
+    persist(
+      (set) => ({
+        ...initialState,
 
-      increment: () => set((state) => ({ count: state.count + 1 }), false, 'increment'),
+        increment: () => set((state) => ({ count: state.count + 1 }), false, 'increment'),
 
-      decrement: () => set((state) => ({ count: state.count - 1 }), false, 'decrement'),
+        decrement: () => set((state) => ({ count: state.count - 1 }), false, 'decrement'),
 
-      reset: () => set(initialState, false, 'reset'),
+        reset: () => set(initialState, false, 'reset'),
 
-      setCount: (value) => set({ count: value }, false, 'setCount'),
+        setCount: (value) => set({ count: value }, false, 'setCount'),
 
-      incrementByAmount: (amount) =>
-        set((state) => ({ count: state.count + amount }), false, 'incrementByAmount'),
-    }),
+        incrementByAmount: (amount) =>
+          set((state) => ({ count: state.count + amount }), false, 'incrementByAmount'),
+      }),
+      {
+        name: 'counter-storage',
+        storage: createJSONStorage(() => AsyncStorage),
+        // Only persist state, not actions
+        partialize: (state) => ({ count: state.count }),
+      }
+    ),
     { name: 'counter-store' }
   )
 );

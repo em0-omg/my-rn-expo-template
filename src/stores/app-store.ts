@@ -1,5 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 
 // Loading state for different operations
 interface LoadingState {
@@ -63,7 +64,10 @@ const initialState: AppState = {
 };
 
 /**
- * App Store - Global application state
+ * App Store - Global application state with persistence
+ *
+ * Persisted fields: isOnboarded, user
+ * Non-persisted fields: isInitialized, globalLoading (runtime state)
  *
  * Usage:
  * ```tsx
@@ -85,45 +89,56 @@ const initialState: AppState = {
  */
 export const useAppStore = create<AppStore>()(
   devtools(
-    (set) => ({
-      ...initialState,
+    persist(
+      (set) => ({
+        ...initialState,
 
-      setInitialized: (value) => set({ isInitialized: value }, false, 'setInitialized'),
+        setInitialized: (value) => set({ isInitialized: value }, false, 'setInitialized'),
 
-      setOnboarded: (value) => set({ isOnboarded: value }, false, 'setOnboarded'),
+        setOnboarded: (value) => set({ isOnboarded: value }, false, 'setOnboarded'),
 
-      setGlobalLoading: (isLoading, message) =>
-        set(
-          {
-            globalLoading: {
-              isLoading,
-              loadingMessage: message,
+        setGlobalLoading: (isLoading, message) =>
+          set(
+            {
+              globalLoading: {
+                isLoading,
+                loadingMessage: message,
+              },
             },
-          },
-          false,
-          'setGlobalLoading'
-        ),
+            false,
+            'setGlobalLoading'
+          ),
 
-      setUser: (userData) =>
-        set(
-          (state) => ({
-            user: { ...state.user, ...userData },
-          }),
-          false,
-          'setUser'
-        ),
+        setUser: (userData) =>
+          set(
+            (state) => ({
+              user: { ...state.user, ...userData },
+            }),
+            false,
+            'setUser'
+          ),
 
-      clearUser: () =>
-        set(
-          {
-            user: initialState.user,
-          },
-          false,
-          'clearUser'
-        ),
+        clearUser: () =>
+          set(
+            {
+              user: initialState.user,
+            },
+            false,
+            'clearUser'
+          ),
 
-      resetApp: () => set(initialState, false, 'resetApp'),
-    }),
+        resetApp: () => set(initialState, false, 'resetApp'),
+      }),
+      {
+        name: 'app-storage',
+        storage: createJSONStorage(() => AsyncStorage),
+        // Only persist user preferences, not runtime state
+        partialize: (state) => ({
+          isOnboarded: state.isOnboarded,
+          user: state.user,
+        }),
+      }
+    ),
     { name: 'app-store' }
   )
 );
