@@ -1,50 +1,138 @@
-# Welcome to your Expo app 👋
+# React Native Expo テンプレート
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+React Native + Expo を使用したモバイルアプリケーション開発のためのテンプレートプロジェクトです。
 
-## Get started
+## 特徴
 
-1. Install dependencies
+- **Expo SDK 54** + **React Native 0.81**
+- **ファイルベースルーティング** - expo-router によるシンプルなナビゲーション
+- **多言語対応 (i18n)** - expo-localization + i18n-js による国際化
+- **ダークモード対応** - システム設定に連動したテーマ切り替え
+- **New Architecture** - React Native の新アーキテクチャ有効
+- **React Compiler** - 自動最適化による高パフォーマンス
+- **型安全なルーティング** - TypeScript による型付きルート
+- **コード品質ツール** - ESLint + Prettier + Lefthook
 
-   ```bash
-   npm install
-   ```
+## ディレクトリ構成
 
-2. Start the app
+```
+src/
+├── app/              # ルーティング（expo-router）
+│   ├── (tabs)/       # タブナビゲーション
+│   ├── _layout.tsx   # ルートレイアウト
+│   └── modal.tsx     # モーダル画面
+├── components/       # 共通コンポーネント
+│   └── ui/           # UIプリミティブ
+├── constants/        # 定数（テーマ、カラー等）
+├── hooks/            # カスタムフック
+├── lib/              # ライブラリ設定
+└── locales/          # 翻訳ファイル
+```
 
-   ```bash
-   npx expo start
-   ```
+## セットアップ
 
-In the output, you'll find options to open the app in a
+```bash
+# 依存関係のインストール
+npm install
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+# 開発サーバーの起動
+npx expo start
+```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+起動後、以下の方法でアプリを開くことができます：
 
-## Get a fresh project
+- **i** - iOS シミュレーター
+- **a** - Android エミュレーター
+- **w** - Web ブラウザ
 
-When you're ready, run:
+## 開発
+
+### パスエイリアス
+
+`@/` を使用して `src/` ディレクトリからインポートできます。
+
+```typescript
+import { Colors } from '@/constants/theme';
+import { useTranslation } from '@/hooks/use-translation';
+```
+
+### 多言語対応 (i18n)
+
+`useTranslation` フックを使用して翻訳を取得します。
+
+```tsx
+import { useTranslation } from '@/hooks/use-translation';
+
+function MyComponent() {
+  const { t } = useTranslation();
+
+  return <Text>{t('home.welcome')}</Text>;
+}
+```
+
+#### 対応言語
+
+- English (en)
+- 日本語 (ja)
+
+#### 言語の追加方法
+
+1. `src/locales/` に翻訳ファイルを作成（例: `ko.ts`）
+2. `src/locales/index.ts` でエクスポート
+3. `src/lib/i18n.ts` に言語を追加
+4. `src/hooks/use-translation.ts` の `SUPPORTED_LOCALES` に追加
+5. `app.json` の `supportedLocales` に追加
+
+### テーマ
+
+`useColorScheme` と `useThemeColor` フックでダーク/ライトモードに対応できます。
+
+```tsx
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useThemeColor } from '@/hooks/use-theme-color';
+
+function MyComponent() {
+  const colorScheme = useColorScheme();
+  const backgroundColor = useThemeColor({}, 'background');
+}
+```
+
+### プラットフォーム固有のコード
+
+ファイル拡張子でプラットフォーム別の実装を分離できます。
+
+```
+component.tsx        # デフォルト（フォールバック）
+component.ios.tsx    # iOS 専用
+component.android.tsx # Android 専用
+component.web.ts     # Web 専用
+```
+
+## コマンド
+
+| コマンド                | 説明                         |
+| ----------------------- | ---------------------------- |
+| `npm start`             | 開発サーバーを起動           |
+| `npm run ios`           | iOS シミュレーターで起動     |
+| `npm run android`       | Android エミュレーターで起動 |
+| `npm run web`           | Web ブラウザで起動           |
+| `npm run lint`          | ESLint でコードチェック      |
+| `npm run format`        | Prettier でコード整形        |
+| `npm run reset-project` | プロジェクトを初期化         |
+
+## 新規プロジェクトの開始
+
+このテンプレートをベースに新しいプロジェクトを始める場合：
 
 ```bash
 npm run reset-project
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+このコマンドで現在のサンプルコードが `app-example/` に移動し、空の `app/` ディレクトリが作成されます。
 
-## Learn more
+## 参考リンク
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo ドキュメント](https://docs.expo.dev/)
+- [React Native ドキュメント](https://reactnative.dev/docs/getting-started)
+- [expo-router ドキュメント](https://docs.expo.dev/router/introduction/)
+- [Expo Localization](https://docs.expo.dev/versions/latest/sdk/localization/)

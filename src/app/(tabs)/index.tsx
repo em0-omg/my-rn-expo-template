@@ -5,9 +5,18 @@ import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useTranslation } from '@/hooks/use-translation';
 import { Link } from 'expo-router';
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
+
+  const devShortcut = Platform.select({
+    ios: 'cmd + d',
+    android: 'cmd + m',
+    web: 'F12',
+  });
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -19,40 +28,38 @@ export default function HomeScreen() {
       }
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+        <ThemedText type="title">{t('home.welcome')}</ThemedText>
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
+        <ThemedText type="subtitle">{t('home.step1.title')}</ThemedText>
         <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
+          {t('home.step1.description', {
+            file: 'app/(tabs)/index.tsx',
+            shortcut: devShortcut ?? '',
+          })}
         </ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <Link href="/modal">
           <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
+            <ThemedText type="subtitle">{t('home.step2.title')}</ThemedText>
           </Link.Trigger>
           <Link.Preview />
           <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
             <Link.MenuAction
-              title="Share"
+              title={t('home.actions.action')}
+              icon="cube"
+              onPress={() => alert('Action pressed')}
+            />
+            <Link.MenuAction
+              title={t('home.actions.share')}
               icon="square.and.arrow.up"
               onPress={() => alert('Share pressed')}
             />
-            <Link.Menu title="More" icon="ellipsis">
+            <Link.Menu title={t('home.actions.more')} icon="ellipsis">
               <Link.MenuAction
-                title="Delete"
+                title={t('home.actions.delete')}
                 icon="trash"
                 destructive
                 onPress={() => alert('Delete pressed')}
@@ -61,18 +68,16 @@ export default function HomeScreen() {
           </Link.Menu>
         </Link>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
+        <ThemedText>{t('home.step2.description')}</ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
+        <ThemedText type="subtitle">{t('home.step3.title')}</ThemedText>
         <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
+          {t('home.step3.description', {
+            command: 'npm run reset-project',
+            dir: 'app',
+            exampleDir: 'app-example',
+          })}
         </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
