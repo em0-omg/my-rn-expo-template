@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Light Mode (default) */
+  :root {
+    color-scheme: light;
+  }
+
+  /* Dark Mode */
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* Base typography - serif as primary per design system */
+  html {
+    font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  }
+}
+
+@layer utilities {
+  /* Design System Button Styles */
+  .btn-primary {
+    @apply rounded-md bg-primary px-6 py-3 font-medium text-white;
+  }
+
+  .btn-primary:hover {
+    @apply bg-primary-hover;
+  }
+
+  .btn-secondary {
+    @apply rounded-md border border-foreground-muted bg-transparent px-6 py-3 font-medium text-foreground;
+  }
+
+  /* Design System Card Styles */
+  .card {
+    @apply rounded-lg bg-background-card p-5 shadow-sm;
+  }
+
+  /* Design System Text Styles */
+  .text-display {
+    @apply font-serif text-foreground-heading;
+  }
+}
