@@ -1,32 +1,13 @@
 import { Link } from 'expo-router';
-import { StyleSheet } from 'react-native';
-
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useTranslation } from '@/hooks/use-translation';
+import { Text, View } from 'react-native';
 
 export default function ModalScreen() {
-  const { t } = useTranslation();
-
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">{t('modal.title')}</ThemedText>
-      <Link href="/" dismissTo style={styles.link}>
-        <ThemedText type="link">{t('modal.goHome')}</ThemedText>
+    <View className="flex-1 items-center justify-center bg-white p-5 dark:bg-gray-900">
+      <Text className="text-2xl font-bold text-gray-800 dark:text-gray-100">Modal</Text>
+      <Link href="/" dismissTo className="mt-4 py-4">
+        <Text className="text-blue-600 dark:text-blue-400">Go to Home</Text>
       </Link>
-    </ThemedView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-});

@@ -1,119 +1,16 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
-import { useTranslation } from '@/hooks/use-translation';
-
-export default function TabTwoScreen() {
-  const { t } = useTranslation();
-
+export default function ExploreScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}
-        >
-          {t('explore.title')}
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>{t('explore.description')}</ThemedText>
-      <Collapsible title={t('explore.fileRouting.title')}>
-        <ThemedText>
-          {t('explore.fileRouting.description1', {
-            screen1: 'app/(tabs)/index.tsx',
-            screen2: 'app/(tabs)/explore.tsx',
-          })}
-        </ThemedText>
-        <ThemedText>
-          {t('explore.fileRouting.description2', {
-            file: 'app/(tabs)/_layout.tsx',
-          })}
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">{t('common.learnMore')}</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title={t('explore.platforms.title')}>
-        <ThemedText>
-          {t('explore.platforms.description', {
-            key: 'w',
-          })}
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title={t('explore.images.title')}>
-        <ThemedText>
-          {t('explore.images.description', {
-            suffix2x: '@2x',
-            suffix3x: '@3x',
-          })}
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">{t('common.learnMore')}</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title={t('explore.theming.title')}>
-        <ThemedText>
-          {t('explore.theming.description', {
-            hook: 'useColorScheme()',
-          })}
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">{t('common.learnMore')}</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title={t('explore.animations.title')}>
-        <ThemedText>
-          {t('explore.animations.description', {
-            file: 'components/HelloWave.tsx',
-            library: 'react-native-reanimated',
-          })}
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              {t('explore.animations.parallax', {
-                file: 'components/ParallaxScrollView.tsx',
-              })}
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View className="flex-1 items-center justify-center bg-gray-100 dark:bg-gray-800">
+      <Text className="text-3xl font-bold text-purple-600 dark:text-purple-400">Explore</Text>
+      <Text className="mt-4 text-center text-gray-600 dark:text-gray-300">
+        TailwindCSS is working!
+      </Text>
+      <View className="mt-8 rounded-xl bg-white p-6 shadow-lg dark:bg-gray-700">
+        <Text className="text-lg font-medium text-gray-800 dark:text-gray-100">Card Example</Text>
+        <Text className="mt-2 text-gray-500 dark:text-gray-400">Styled with className prop</Text>
+      </View>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
