@@ -1,8 +1,0 @@
-appId: com.anonymous.reactnativeexpotemplate
-name: App launches to the home tab
----
-- launchApp:
-    clearState: true
-- assertVisible: 'Hello World'
-- assertVisible: 'Welcome to the Design System!'
-- assertVisible: 'This is a card component'

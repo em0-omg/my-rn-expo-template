@@ -49,7 +49,7 @@ This is an Expo SDK 57 project using React Native 0.86 with file-based routing v
 - **i18n**: i18n-js + expo-localization
 - **Navigation**: bundled with expo-router (import from `expo-router/react-navigation`)
 - **Animation**: react-native-reanimated, react-native-gesture-handler
-- **Testing**: Jest (`jest-expo` preset) + @testing-library/react-native 14 (unit/component), Maestro (E2E)
+- **Testing**: Jest (`jest-expo` preset) + @testing-library/react-native 14 (unit/component)
 - **Dev Tools**: ESLint, Prettier, Lefthook (Git hooks)
 
 ### Version policy
@@ -233,8 +233,8 @@ no longer valid keys in `app.json`.
 - **Unit/component**: Jest (`jest-expo` preset) + `@testing-library/react-native` — run with
   `npm test`. RNTL v14's `render`, `renderHook`, `fireEvent`, and `act` are async and must be
   `await`ed; matchers like `toBeOnTheScreen` register automatically (no `extend-expect` import).
-- **E2E**: Maestro flows in `.maestro/`, keyed by `testID` — requires the Maestro CLI and runs
-  against a built app, not Expo Go.
+- **No integration or E2E suite.** Add one (Maestro, Detox, …) when a feature actually needs it
+  rather than carrying a harness nothing runs.
 - CI (`.github/workflows/ci.yml`) and `lefthook.yml` both run lint, typecheck, and tests.
 
 See `.claude/rules/testing-rule.md` for details.
@@ -257,4 +257,4 @@ Additional development rules are located in `.claude/rules/`:
 - `state-management-rule.md` - Zustand and TanStack Query patterns and best practices
 - `i18n-rule.md` - Internationalization guidelines
 - `styling-rule.md` - NativeWind/Tailwind styling conventions
-- `testing-rule.md` - Jest/Testing Library unit tests and Maestro E2E conventions
+- `testing-rule.md` - Jest/Testing Library unit test conventions

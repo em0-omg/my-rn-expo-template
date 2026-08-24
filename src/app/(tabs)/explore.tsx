@@ -43,23 +43,17 @@ function CounterCard() {
 
       <View className="mt-4 flex-row justify-center gap-3">
         <Pressable
-          testID="counter-decrement"
           onPress={decrement}
           className="rounded-lg bg-foreground-muted px-5 py-3 active:opacity-80"
         >
           <Text className="font-serif text-body font-medium text-background">-</Text>
         </Pressable>
 
-        <Pressable
-          testID="counter-reset"
-          onPress={reset}
-          className="rounded-lg bg-border px-5 py-3 active:opacity-80"
-        >
+        <Pressable onPress={reset} className="rounded-lg bg-border px-5 py-3 active:opacity-80">
           <Text className="font-serif text-caption font-medium text-foreground">Reset</Text>
         </Pressable>
 
         <Pressable
-          testID="counter-increment"
           onPress={increment}
           className="rounded-lg bg-primary px-5 py-3 active:opacity-80"
         >
@@ -105,7 +99,7 @@ export default function ExploreScreen() {
           </View>
         }
         ListEmptyComponent={
-          <View testID="photos-status" className="items-center px-8 py-10">
+          <View className="items-center px-8 py-10">
             {isPending ? (
               <>
                 <ActivityIndicator />
@@ -119,7 +113,6 @@ export default function ExploreScreen() {
                   {error instanceof Error ? error.message : 'Could not load photos.'}
                 </Text>
                 <Pressable
-                  testID="photos-retry"
                   onPress={() => refetch()}
                   className="mt-4 rounded-lg bg-primary px-5 py-3 active:opacity-80"
                 >

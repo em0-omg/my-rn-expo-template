@@ -1,7 +1,8 @@
 # Testing Rules
 
-This project tests at two levels: Jest unit/component tests for logic and components, and Maestro
-E2E flows that drive a real, built app end to end.
+This project ships Jest unit and component tests only. Integration and end-to-end suites (Maestro,
+Detox, and friends) are deliberately absent — add one when a feature actually needs it, rather than
+carrying a harness nothing runs.
 
 ## Unit & Component Tests (Jest)
 
@@ -77,31 +78,6 @@ function createWrapper() {
 Clear the client in `afterEach` and mock `global.fetch` per test. See
 `src/hooks/__tests__/use-photos.test.tsx` for the full pattern, including asserting both the
 success shape and a non-OK response.
-
-## End-to-End Tests (Maestro)
-
-Flows live in `.maestro/*.yaml` and drive a **built app** — not Expo Go. Install the
-[Maestro CLI](https://maestro.mobile.dev/) separately, build the app, and run:
-
-```bash
-maestro test .maestro/
-```
-
-### Convention: stable `testID`
-
-Anything a flow taps or asserts on by id needs a stable `testID` (tab bar buttons use
-`tabBarButtonTestID` instead — see `src/app/(tabs)/_layout.tsx`). Current flows drive:
-
-| `testID`            | Element                        |
-| ------------------- | ------------------------------ |
-| `home-tab`          | Home tab bar button            |
-| `explore-tab`       | Explore tab bar button         |
-| `counter-increment` | Increment button (Explore tab) |
-| `counter-decrement` | Decrement button (Explore tab) |
-| `counter-reset`     | Reset button (Explore tab)     |
-
-When you add an element a flow needs to target, give it a `testID` rather than relying on visible
-text — text changes with locale (see `.claude/rules/i18n-rule.md`).
 
 ## CI & Git Hooks
 

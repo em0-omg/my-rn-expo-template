@@ -14,7 +14,7 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 - **New Architecture** - React Native の新アーキテクチャ有効
 - **React Compiler** - 自動最適化による高パフォーマンス
 - **型安全なルーティング** - TypeScript による型付きルート
-- **テスト** - Jest + Testing Library によるユニットテスト、Maestro による E2E テスト
+- **テスト** - Jest + Testing Library によるユニットテスト
 - **コード品質ツール** - ESLint + Prettier + Lefthook
 
 ## 技術スタック
@@ -79,12 +79,11 @@ Zustand は**クライアント状態**（UI・ユーザー設定・ローカル
 
 ### テスト
 
-| ライブラリ                    | バージョン       | 用途                                 |
-| ----------------------------- | ---------------- | ------------------------------------ |
-| jest-expo                     | ~57.0            | Jest プリセット（Expo 向け）         |
-| Jest                          | ~29.7            | テストランナー                       |
-| @testing-library/react-native | ^14.0            | コンポーネント・フックのテスト       |
-| Maestro                       | 別途インストール | E2E テスト（ビルド済みアプリが対象） |
+| ライブラリ                    | バージョン | 用途                           |
+| ----------------------------- | ---------- | ------------------------------ |
+| jest-expo                     | ~57.0      | Jest プリセット（Expo 向け）   |
+| Jest                          | ~29.7      | テストランナー                 |
+| @testing-library/react-native | ^14.0      | コンポーネント・フックのテスト |
 
 詳細は `.claude/rules/testing-rule.md` を参照してください。
 
@@ -385,9 +384,8 @@ TanStack Query を使うフックのテストは、アプリ共有の `queryClie
 `retry: false` / `gcTime: 0` を指定したテスト用の `QueryClient` を作成します
 （`src/hooks/__tests__/use-photos.test.tsx` を参照）。
 
-E2E テストは Maestro で `.maestro/*.yaml` に記述し、`testID` で要素を指定します。
-[Maestro CLI](https://maestro.mobile.dev/) を別途インストールし、ビルド済みアプリ（Expo Go では
-不可）に対して実行します。
+結合テスト・E2E テストは同梱していません。必要になった機能が出てきた時点で
+Maestro や Detox などを追加する方針です（誰も動かさないテスト基盤を抱え込まないため）。
 
 詳細は `.claude/rules/testing-rule.md` を参照してください。
 
@@ -437,4 +435,3 @@ npm run reset-project
 - [FlashList](https://shopify.github.io/flash-list/docs/)
 - [expo-image](https://docs.expo.dev/versions/latest/sdk/image/)
 - [Testing Library (React Native)](https://callstack.github.io/react-native-testing-library/)
-- [Maestro](https://maestro.mobile.dev/)
