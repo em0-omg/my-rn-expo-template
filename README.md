@@ -4,7 +4,7 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 
 ## 特徴
 
-- **Expo SDK 54** + **React Native 0.81** + **React 19.1**
+- **Expo SDK 57** + **React Native 0.86** + **React 19.2**
 - **ファイルベースルーティング** - expo-router によるシンプルなナビゲーション
 - **多言語対応 (i18n)** - expo-localization + i18n-js による国際化
 - **ダークモード対応** - システム設定に連動したテーマ切り替え
@@ -21,11 +21,11 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 
 | ライブラリ   | バージョン | 用途                       |
 | ------------ | ---------- | -------------------------- |
-| Expo         | ~54.0      | 開発プラットフォーム       |
-| React Native | 0.81       | モバイルフレームワーク     |
-| React        | 19.1       | UI ライブラリ              |
-| TypeScript   | ~5.9       | 型システム                 |
-| expo-router  | ~6.0       | ファイルベースルーティング |
+| Expo         | ~57.0      | 開発プラットフォーム       |
+| React Native | 0.86       | モバイルフレームワーク     |
+| React        | 19.2       | UI ライブラリ              |
+| TypeScript   | ~6.0       | 型システム                 |
+| expo-router  | ~57.0      | ファイルベースルーティング |
 
 ### スタイリング
 
@@ -45,7 +45,7 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 
 | ライブラリ        | バージョン | 用途                 |
 | ----------------- | ---------- | -------------------- |
-| expo-localization | ~17.0      | デバイスロケール取得 |
+| expo-localization | ~57.0      | デバイスロケール取得 |
 | i18n-js           | ^4.5       | 翻訳ライブラリ       |
 
 ### リスト・画像
@@ -53,24 +53,27 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 | ライブラリ          | バージョン | 用途                               |
 | ------------------- | ---------- | ---------------------------------- |
 | @shopify/flash-list | 2.0        | 高性能リストコンポーネント         |
-| expo-image          | ~3.0       | 高性能画像（blurhash, キャッシュ） |
+| expo-image          | ~57.0      | 高性能画像（blurhash, キャッシュ） |
 
 ### ナビゲーション・UI
 
-| ライブラリ                   | バージョン | 用途                         |
-| ---------------------------- | ---------- | ---------------------------- |
-| React Navigation             | ^7.x       | ナビゲーションフレームワーク |
-| react-native-reanimated      | ~4.1       | アニメーション               |
-| react-native-gesture-handler | ~2.28      | ジェスチャー                 |
-| expo-haptics                 | ~15.0      | 触覚フィードバック           |
+| ライブラリ                   | バージョン | 用途                                 |
+| ---------------------------- | ---------- | ------------------------------------ |
+| expo-router/react-navigation | ~57.0      | ナビゲーション（expo-router に同梱） |
+| react-native-reanimated      | ~4.5       | アニメーション                       |
+| react-native-gesture-handler | ~2.32      | ジェスチャー                         |
+| expo-haptics                 | ~57.0      | 触覚フィードバック                   |
 
 ### 開発ツール
 
 | ライブラリ | バージョン | 用途                 |
 | ---------- | ---------- | -------------------- |
-| ESLint     | ^9.25      | 静的解析             |
-| Prettier   | ^3.7       | コードフォーマッター |
-| Lefthook   | ^2.0       | Git フック管理       |
+| ESLint     | ^9.39      | 静的解析             |
+| Prettier   | ^3.9       | コードフォーマッター |
+| Lefthook   | ^2.1       | Git フック管理       |
+
+> ESLint 9 系は EOL ですが、`eslint-config-expo` が依存する `eslint-plugin-react` が ESLint 10 に
+> 未対応のため、Expo エコシステムが追随するまで 9 系を維持します。
 
 ## ディレクトリ構成
 
@@ -159,9 +162,11 @@ function MyComponent() {
 
 1. `src/locales/` に翻訳ファイルを作成（例: `ko.ts`）
 2. `src/locales/index.ts` でエクスポート
-3. `src/lib/i18n.ts` に言語を追加
-4. `src/hooks/use-translation.ts` の `SUPPORTED_LOCALES` に追加
-5. `app.json` の `supportedLocales` に追加
+3. `src/lib/i18n.ts` の `SUPPORTED_LOCALES` と `I18n` インスタンスに言語を追加
+4. `app.json` の `supportedLocales` に追加
+
+言語の切り替えは必ず `useTranslation` の `setLocale` を使います（`i18n.locale` への直接代入は
+再レンダリングされません）。
 
 ### 状態管理 (Zustand)
 
@@ -225,7 +230,6 @@ function PhotoGallery() {
     <FlashList
       data={photos}
       renderItem={({ item }) => <PhotoCard item={item} />}
-      estimatedItemSize={200}
       keyExtractor={(item) => item.id}
     />
   );
@@ -236,7 +240,7 @@ function PhotoGallery() {
 
 - FlatList より高速なレンダリング
 - メモリ効率の良いリサイクル機構
-- `estimatedItemSize` による最適化
+- v2 ではアイテムサイズを自動計測（`estimatedItemSize` は廃止され、渡すと型エラー）
 
 ### 画像 (expo-image)
 
@@ -305,6 +309,7 @@ component.web.ts     # Web 専用
 | `npm run android`       | Android エミュレーターで起動 |
 | `npm run web`           | Web ブラウザで起動           |
 | `npm run lint`          | ESLint でコードチェック      |
+| `npm run typecheck`     | TypeScript で型チェック      |
 | `npm run format`        | Prettier でコード整形        |
 | `npm run reset-project` | プロジェクトを初期化         |
 

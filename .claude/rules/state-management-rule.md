@@ -107,9 +107,7 @@ create<Store>()(
     persist(
       // Inner: handles persistence
       (set) => ({}),
-      {
-        /* persist options */
-      }
+      {/* persist options */}
     ),
     { name: 'store-name' }
   )
@@ -162,23 +160,18 @@ const actions = useCounterStore((state) => ({
 Only persist what's necessary:
 
 ```typescript
-persist(
-  (set) => ({
-    /* ... */
+persist((set) => ({/* ... */}), {
+  name: 'app-storage',
+  storage: createJSONStorage(() => AsyncStorage),
+  partialize: (state) => ({
+    // Persist user preferences
+    isOnboarded: state.isOnboarded,
+    user: state.user,
+    // Don't persist runtime state
+    // isInitialized: NO
+    // globalLoading: NO
   }),
-  {
-    name: 'app-storage',
-    storage: createJSONStorage(() => AsyncStorage),
-    partialize: (state) => ({
-      // Persist user preferences
-      isOnboarded: state.isOnboarded,
-      user: state.user,
-      // Don't persist runtime state
-      // isInitialized: NO
-      // globalLoading: NO
-    }),
-  }
-);
+});
 ```
 
 ### Storage Keys

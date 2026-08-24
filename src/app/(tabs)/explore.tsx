@@ -46,7 +46,6 @@ export default function ExploreScreen() {
       <FlashList
         data={PHOTO_DATA}
         renderItem={({ item }) => <PhotoCard item={item} />}
-        estimatedItemSize={240}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}
         ListHeaderComponent={

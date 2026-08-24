@@ -19,6 +19,9 @@ npx expo start --web
 # Lint
 npm run lint
 
+# Type check (also runs on pre-push via lefthook)
+npm run typecheck
+
 # Format code
 npm run format
 
@@ -28,20 +31,35 @@ npm run reset-project
 
 ## Architecture
 
-This is an Expo SDK 54 project using React Native 0.81 with file-based routing via expo-router.
+This is an Expo SDK 57 project using React Native 0.86 with file-based routing via expo-router.
 
 ### Tech Stack
 
-- **Core**: Expo SDK 54, React Native 0.81, React 19.1, TypeScript 5.9
+- **Core**: Expo SDK 57, React Native 0.86, React 19.2, TypeScript 6.0
 - **Routing**: expo-router (file-based routing with typed routes)
 - **Styling**: NativeWind 4.2 + Tailwind CSS 3.4
 - **State Management**: Zustand 5.0 + AsyncStorage (persistent storage)
 - **Lists**: @shopify/flash-list 2.0 (high-performance list component)
 - **Images**: expo-image (blurhash placeholders, caching, transitions)
 - **i18n**: i18n-js + expo-localization
-- **Navigation**: React Navigation 7
+- **Navigation**: bundled with expo-router (import from `expo-router/react-navigation`)
 - **Animation**: react-native-reanimated, react-native-gesture-handler
 - **Dev Tools**: ESLint, Prettier, Lefthook (Git hooks)
+
+### Version policy
+
+Runtime package versions are owned by the Expo SDK, not by us. Use `npx expo install <pkg>` and
+`npx expo install --fix` rather than `npm install`, and treat `npx expo-doctor` as the source of
+truth. Several packages are deliberately _not_ on their npm `latest`:
+
+| Package                    | Pinned  | Why not latest                                                            |
+| -------------------------- | ------- | ------------------------------------------------------------------------- |
+| `@shopify/flash-list`      | 2.0.2   | Pinned by SDK 57's `bundledNativeModules.json`                            |
+| `async-storage`            | 2.2.0   | Pinned by SDK 57; 3.x leaves Expo's validated set                         |
+| `eslint`                   | 9.x     | `eslint-plugin-react` (via `eslint-config-expo`) has no ESLint 10 support |
+| `nativewind`/`tailwindcss` | 4.2/3.4 | NativeWind v5 is preview and "not intended for production use"            |
+
+`eslint-config-expo` and `babel-preset-expo` track the SDK major version — bump them with the SDK.
 
 ### Directory Structure
 
@@ -106,15 +124,10 @@ const increment = useCounterStore((state) => state.increment);
 // With persistence via AsyncStorage
 export const useCounterStore = create<CounterStore>()(
   devtools(
-    persist(
-      (set) => ({
-        /* ... */
-      }),
-      {
-        name: 'counter-storage',
-        storage: createJSONStorage(() => AsyncStorage),
-      }
-    )
+    persist((set) => ({/* ... */}), {
+      name: 'counter-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+    })
   )
 );
 ```
@@ -140,9 +153,15 @@ function Component() {
 
 Supported locales: `en`, `ja`
 
+`i18n.locale` is module state, so `src/lib/i18n.ts` exposes a subscription that `useTranslation`
+reads through `useSyncExternalStore`. Change the language with the hook's `setLocale` — never by
+assigning `i18n.locale` directly, which mutates during render and skips the re-render. An explicit
+`setLocale` also takes precedence over later device-language changes.
+
 **Themed components**: `ThemedText` and `ThemedView` wrap native components with automatic dark/light mode support.
 
-**FlashList**: High-performance list component (drop-in replacement for FlatList)
+**FlashList**: High-performance list component (drop-in replacement for FlatList). v2 sizes items
+automatically — `estimatedItemSize` was removed and passing it is a type error.
 
 ```tsx
 import { FlashList } from '@shopify/flash-list';
@@ -150,7 +169,6 @@ import { FlashList } from '@shopify/flash-list';
 <FlashList
   data={items}
   renderItem={({ item }) => <ItemComponent item={item} />}
-  estimatedItemSize={200}
   keyExtractor={(item) => item.id}
 />;
 ```
@@ -173,7 +191,9 @@ import { Image } from 'expo-image';
 
 - `typedRoutes`: Type-safe routing
 - `reactCompiler`: React Compiler enabled
-- `newArchEnabled`: React Native New Architecture
+
+The New Architecture is mandatory from SDK 55 on, so `newArchEnabled` (and `edgeToEdgeEnabled`) are
+no longer valid keys in `app.json`.
 
 ### Design System
 
