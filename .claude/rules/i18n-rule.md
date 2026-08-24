@@ -148,27 +148,23 @@ export { default as ko } from './ko'; // Add new export
 
 ### Step 3: Register in i18n.ts
 
+Both the instance and `SUPPORTED_LOCALES` live in `src/lib/i18n.ts`, so this is the only code
+change needed — `resolveLocale` and the `SupportedLocale` type follow automatically.
+
 ```typescript
 // src/lib/i18n.ts
 import { en, ja, ko } from '@/locales';
+
+export const SUPPORTED_LOCALES = ['en', 'ja', 'ko'] as const; // Add new locale
 
 const i18n = new I18n({
   en,
   ja,
   ko, // Add new locale
 });
-
-i18n.locale = ['en', 'ja', 'ko'].includes(deviceLanguage) ? deviceLanguage : 'en';
 ```
 
-### Step 4: Update useTranslation Hook
-
-```typescript
-// src/hooks/use-translation.ts
-const SUPPORTED_LOCALES = ['en', 'ja', 'ko'] as const;
-```
-
-### Step 5: Update app.json
+### Step 4: Update app.json
 
 ```json
 {

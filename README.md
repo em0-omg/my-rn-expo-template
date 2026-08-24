@@ -4,15 +4,17 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 
 ## 特徴
 
-- **Expo SDK 54** + **React Native 0.81** + **React 19.1**
+- **Expo SDK 57** + **React Native 0.86** + **React 19.2**
 - **ファイルベースルーティング** - expo-router によるシンプルなナビゲーション
 - **多言語対応 (i18n)** - expo-localization + i18n-js による国際化
 - **ダークモード対応** - システム設定に連動したテーマ切り替え
 - **NativeWind** - Tailwind CSS によるスタイリング
-- **Zustand** - 軽量な状態管理 + AsyncStorage による永続化
+- **Zustand** - 軽量なクライアント状態管理 + AsyncStorage による永続化
+- **TanStack Query** - サーバー状態管理（フェッチ・キャッシュ・自動再検証）
 - **New Architecture** - React Native の新アーキテクチャ有効
 - **React Compiler** - 自動最適化による高パフォーマンス
 - **型安全なルーティング** - TypeScript による型付きルート
+- **テスト** - Jest + Testing Library によるユニットテスト
 - **コード品質ツール** - ESLint + Prettier + Lefthook
 
 ## 技術スタック
@@ -21,11 +23,11 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 
 | ライブラリ   | バージョン | 用途                       |
 | ------------ | ---------- | -------------------------- |
-| Expo         | ~54.0      | 開発プラットフォーム       |
-| React Native | 0.81       | モバイルフレームワーク     |
-| React        | 19.1       | UI ライブラリ              |
-| TypeScript   | ~5.9       | 型システム                 |
-| expo-router  | ~6.0       | ファイルベースルーティング |
+| Expo         | ~57.0      | 開発プラットフォーム       |
+| React Native | 0.86       | モバイルフレームワーク     |
+| React        | 19.2       | UI ライブラリ              |
+| TypeScript   | ~6.0       | 型システム                 |
+| expo-router  | ~57.0      | ファイルベースルーティング |
 
 ### スタイリング
 
@@ -36,16 +38,26 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 
 ### 状態管理
 
-| ライブラリ   | バージョン | 用途                     |
-| ------------ | ---------- | ------------------------ |
-| Zustand      | ^5.0       | 軽量な状態管理           |
-| AsyncStorage | 2.2        | ローカル永続化ストレージ |
+| ライブラリ   | バージョン | 用途                       |
+| ------------ | ---------- | -------------------------- |
+| Zustand      | ^5.0       | 軽量なクライアント状態管理 |
+| AsyncStorage | 2.2        | ローカル永続化ストレージ   |
+
+### サーバー状態 (TanStack Query)
+
+| ライブラリ            | バージョン | 用途                                         |
+| --------------------- | ---------- | -------------------------------------------- |
+| @tanstack/react-query | ^5.102     | リモートデータのフェッチ・キャッシュ・再検証 |
+
+Zustand は**クライアント状態**（UI・ユーザー設定・ローカルデータ）を、TanStack Query は**サーバー状態**
+（API から取得したデータ）を担当します。フェッチしたデータを Zustand ストアにコピーしないでください。
+詳細は `.claude/rules/state-management-rule.md` を参照してください。
 
 ### 国際化
 
 | ライブラリ        | バージョン | 用途                 |
 | ----------------- | ---------- | -------------------- |
-| expo-localization | ~17.0      | デバイスロケール取得 |
+| expo-localization | ~57.0      | デバイスロケール取得 |
 | i18n-js           | ^4.5       | 翻訳ライブラリ       |
 
 ### リスト・画像
@@ -53,24 +65,42 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 | ライブラリ          | バージョン | 用途                               |
 | ------------------- | ---------- | ---------------------------------- |
 | @shopify/flash-list | 2.0        | 高性能リストコンポーネント         |
-| expo-image          | ~3.0       | 高性能画像（blurhash, キャッシュ） |
+| expo-image          | ~57.0      | 高性能画像（blurhash, キャッシュ） |
 
 ### ナビゲーション・UI
 
-| ライブラリ                   | バージョン | 用途                         |
-| ---------------------------- | ---------- | ---------------------------- |
-| React Navigation             | ^7.x       | ナビゲーションフレームワーク |
-| react-native-reanimated      | ~4.1       | アニメーション               |
-| react-native-gesture-handler | ~2.28      | ジェスチャー                 |
-| expo-haptics                 | ~15.0      | 触覚フィードバック           |
+| ライブラリ                                | バージョン | 用途                                      |
+| ----------------------------------------- | ---------- | ----------------------------------------- |
+| expo-router/react-navigation              | ~57.0      | ナビゲーション（expo-router に同梱）      |
+| react-native-reanimated                   | ~4.5       | アニメーション                            |
+| react-native-gesture-handler              | ~2.32      | ジェスチャー                              |
+| expo-haptics                              | ~57.0      | 触覚フィードバック                        |
+| @react-native-vector-icons/material-icons | ^13.1      | アイコン（Android/Web、Expo Go でも動作） |
+
+### テスト
+
+| ライブラリ                    | バージョン | 用途                           |
+| ----------------------------- | ---------- | ------------------------------ |
+| jest-expo                     | ~57.0      | Jest プリセット（Expo 向け）   |
+| Jest                          | ~29.7      | テストランナー                 |
+| @testing-library/react-native | ^14.0      | コンポーネント・フックのテスト |
+
+詳細は `.claude/rules/testing-rule.md` を参照してください。
 
 ### 開発ツール
 
 | ライブラリ | バージョン | 用途                 |
 | ---------- | ---------- | -------------------- |
-| ESLint     | ^9.25      | 静的解析             |
-| Prettier   | ^3.7       | コードフォーマッター |
-| Lefthook   | ^2.0       | Git フック管理       |
+| ESLint     | ^9.39      | 静的解析             |
+| Prettier   | ^3.9       | コードフォーマッター |
+| Lefthook   | ^2.1       | Git フック管理       |
+
+> ESLint 9 系は EOL ですが、`eslint-config-expo` が依存する `eslint-plugin-react` が ESLint 10 に
+> 未対応のため、Expo エコシステムが追随するまで 9 系を維持します。
+>
+> `.github/workflows/ci.yml` は `main` への PR・push で lint・typecheck・フォーマットチェック・
+> テストを実行します。`lefthook.yml` により、ローカルでも pre-commit で lint/format、pre-push で
+> typecheck/test が自動実行されます。
 
 ## ディレクトリ構成
 
@@ -90,9 +120,11 @@ src/
 ├── hooks/            # カスタムフック
 │   ├── use-color-scheme.ts   # カラースキーム検出
 │   ├── use-theme-color.ts    # テーマカラー取得
-│   └── use-translation.ts    # 翻訳フック
+│   ├── use-translation.ts    # 翻訳フック
+│   └── use-photos.ts         # TanStack Query の使用例
 ├── lib/              # ライブラリ設定
-│   └── i18n.ts       # 国際化設定
+│   ├── i18n.ts           # 国際化設定
+│   └── query-client.ts   # TanStack Query クライアント設定
 ├── locales/          # 翻訳ファイル
 │   ├── en.ts         # 英語
 │   ├── ja.ts         # 日本語
@@ -159,13 +191,16 @@ function MyComponent() {
 
 1. `src/locales/` に翻訳ファイルを作成（例: `ko.ts`）
 2. `src/locales/index.ts` でエクスポート
-3. `src/lib/i18n.ts` に言語を追加
-4. `src/hooks/use-translation.ts` の `SUPPORTED_LOCALES` に追加
-5. `app.json` の `supportedLocales` に追加
+3. `src/lib/i18n.ts` の `SUPPORTED_LOCALES` と `I18n` インスタンスに言語を追加
+4. `app.json` の `supportedLocales` に追加
+
+言語の切り替えは必ず `useTranslation` の `setLocale` を使います（`i18n.locale` への直接代入は
+再レンダリングされません）。
 
 ### 状態管理 (Zustand)
 
-Zustand を使用した状態管理の例：
+Zustand はクライアント状態（UI・ユーザー設定・ローカルデータ）を担当します。API から取得したデータは
+Zustand ストアにコピーせず、TanStack Query に任せてください（後述）。
 
 ```tsx
 import { useCounterStore, useAppStore } from '@/stores';
@@ -185,6 +220,41 @@ function App() {
   // アプリ初期化処理...
 }
 ```
+
+詳細は `.claude/rules/state-management-rule.md` を参照してください。
+
+### サーバー状態管理 (TanStack Query)
+
+`src/lib/query-client.ts` で作成した `queryClient` をルートレイアウトの `QueryClientProvider` に渡し、
+`subscribeToAppStateFocus()` で React Native の `AppState` を React Query の `focusManager` に橋渡しし
+ます（React Query 標準のフォーカス検出は Web 専用のため）。
+
+```tsx
+// src/app/_layout.tsx
+useEffect(subscribeToAppStateFocus, []);
+
+<QueryClientProvider client={queryClient}>{/* ... */}</QueryClientProvider>;
+```
+
+クエリキーはファクトリ関数でまとめ、フェッチ関数には `useQuery` が渡す `AbortSignal` をそのまま渡し
+てリクエストをキャンセル可能にします。
+
+```typescript
+export const photoKeys = {
+  all: ['photos'] as const,
+  list: (limit: number) => [...photoKeys.all, 'list', limit] as const,
+};
+
+export function usePhotos(limit = 20) {
+  return useQuery({
+    queryKey: photoKeys.list(limit),
+    queryFn: ({ signal }) => fetchPhotos(limit, signal),
+  });
+}
+```
+
+画面側では `isPending` / `isError` / `refetch` / `isRefetching` でローディング・エラー・
+プルリフレッシュを表現します（`src/app/(tabs)/explore.tsx` を参照）。
 
 ### スタイリング (NativeWind)
 
@@ -225,7 +295,6 @@ function PhotoGallery() {
     <FlashList
       data={photos}
       renderItem={({ item }) => <PhotoCard item={item} />}
-      estimatedItemSize={200}
       keyExtractor={(item) => item.id}
     />
   );
@@ -236,7 +305,7 @@ function PhotoGallery() {
 
 - FlatList より高速なレンダリング
 - メモリ効率の良いリサイクル機構
-- `estimatedItemSize` による最適化
+- v2 ではアイテムサイズを自動計測（`estimatedItemSize` は廃止され、渡すと型エラー）
 
 ### 画像 (expo-image)
 
@@ -296,6 +365,30 @@ component.android.tsx # Android 専用
 component.web.ts     # Web 専用
 ```
 
+### テスト
+
+ユニットテストは `__tests__/` ディレクトリにコードと並べて配置し、`npm test` で実行します。
+
+```tsx
+import { render, screen } from '@testing-library/react-native';
+
+it('renders its children', async () => {
+  // @testing-library/react-native v14 では render/renderHook/fireEvent/act が
+  // すべて非同期になったため、必ず await します。
+  await render(<ThemedText>Hello</ThemedText>);
+  expect(screen.getByText('Hello')).toBeOnTheScreen();
+});
+```
+
+TanStack Query を使うフックのテストは、アプリ共有の `queryClient` ではなく
+`retry: false` / `gcTime: 0` を指定したテスト用の `QueryClient` を作成します
+（`src/hooks/__tests__/use-photos.test.tsx` を参照）。
+
+結合テスト・E2E テストは同梱していません。必要になった機能が出てきた時点で
+Maestro や Detox などを追加する方針です（誰も動かさないテスト基盤を抱え込まないため）。
+
+詳細は `.claude/rules/testing-rule.md` を参照してください。
+
 ## コマンド
 
 | コマンド                | 説明                         |
@@ -305,6 +398,8 @@ component.web.ts     # Web 専用
 | `npm run android`       | Android エミュレーターで起動 |
 | `npm run web`           | Web ブラウザで起動           |
 | `npm run lint`          | ESLint でコードチェック      |
+| `npm run typecheck`     | TypeScript で型チェック      |
+| `npm test`              | ユニットテストを実行         |
 | `npm run format`        | Prettier でコード整形        |
 | `npm run reset-project` | プロジェクトを初期化         |
 
@@ -336,5 +431,7 @@ npm run reset-project
 - [Expo Localization](https://docs.expo.dev/versions/latest/sdk/localization/)
 - [NativeWind](https://www.nativewind.dev/)
 - [Zustand](https://zustand-demo.pmnd.rs/)
+- [TanStack Query](https://tanstack.com/query/latest)
 - [FlashList](https://shopify.github.io/flash-list/docs/)
 - [expo-image](https://docs.expo.dev/versions/latest/sdk/image/)
+- [Testing Library (React Native)](https://callstack.github.io/react-native-testing-library/)

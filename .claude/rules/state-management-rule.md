@@ -1,6 +1,30 @@
-# State Management Rules (Zustand)
+# State Management Rules (Zustand + TanStack Query)
 
-This project uses Zustand for state management with AsyncStorage for persistence.
+This project splits state into two layers: Zustand (+ AsyncStorage) for client state, and
+TanStack Query for server state fetched from remote APIs.
+
+## Client State vs Server State
+
+Zustand owns **client state**: UI state, user preferences, and data that only exists on the
+device. TanStack Query owns **server state**: anything fetched from a remote API.
+
+**Do not copy fetched data into a Zustand store.** Let TanStack Query own the cache, loading
+state, and error state, and read it with `useQuery` — a Zustand copy is a second, easily stale
+source of truth for the same data.
+
+```tsx
+// Bad: server data duplicated into client state
+const photos = usePhotosStore((state) => state.photos);
+useEffect(() => {
+  fetchPhotos().then((data) => usePhotosStore.getState().setPhotos(data));
+}, []);
+
+// Good: TanStack Query owns the fetch, cache, and loading/error state
+const { data: photos, isPending, isError } = usePhotos();
+```
+
+See `src/hooks/use-photos.ts` for the reference implementation and
+`.claude/rules/testing-rule.md` for how to test hooks built on `useQuery`.
 
 ## Core Principles
 
@@ -107,9 +131,7 @@ create<Store>()(
     persist(
       // Inner: handles persistence
       (set) => ({}),
-      {
-        /* persist options */
-      }
+      {/* persist options */}
     ),
     { name: 'store-name' }
   )
@@ -162,23 +184,18 @@ const actions = useCounterStore((state) => ({
 Only persist what's necessary:
 
 ```typescript
-persist(
-  (set) => ({
-    /* ... */
+persist((set) => ({/* ... */}), {
+  name: 'app-storage',
+  storage: createJSONStorage(() => AsyncStorage),
+  partialize: (state) => ({
+    // Persist user preferences
+    isOnboarded: state.isOnboarded,
+    user: state.user,
+    // Don't persist runtime state
+    // isInitialized: NO
+    // globalLoading: NO
   }),
-  {
-    name: 'app-storage',
-    storage: createJSONStorage(() => AsyncStorage),
-    partialize: (state) => ({
-      // Persist user preferences
-      isOnboarded: state.isOnboarded,
-      user: state.user,
-      // Don't persist runtime state
-      // isInitialized: NO
-      // globalLoading: NO
-    }),
-  }
-);
+});
 ```
 
 ### Storage Keys
@@ -260,3 +277,62 @@ function Counter() {
   );
 }
 ```
+
+## Server State (TanStack Query)
+
+### Query Client
+
+`src/lib/query-client.ts` exports the shared `queryClient` and `subscribeToAppStateFocus()`.
+React Query's default focus-based refetch detection is web-only, so `subscribeToAppStateFocus()`
+bridges React Native's `AppState` into `focusManager`. Both are wired up once, in the root layout:
+
+```tsx
+// src/app/_layout.tsx
+useEffect(subscribeToAppStateFocus, []);
+
+return <QueryClientProvider client={queryClient}>{/* ... */}</QueryClientProvider>;
+```
+
+### Query Key Factory
+
+Group a resource's keys under one object instead of writing array literals at each call site, so
+every consumer (and `queryClient.invalidateQueries`) stays in sync:
+
+```typescript
+export const photoKeys = {
+  all: ['photos'] as const,
+  list: (limit: number) => [...photoKeys.all, 'list', limit] as const,
+};
+```
+
+### AbortSignal
+
+Pass the `signal` argument `useQuery` gives `queryFn` straight into `fetch`, so an in-flight
+request is cancelled when the query key changes or the component unmounts:
+
+```typescript
+async function fetchPhotos(limit: number, signal: AbortSignal): Promise<Photo[]> {
+  const response = await fetch(`https://picsum.photos/v2/list?page=1&limit=${limit}`, { signal });
+  if (!response.ok) {
+    throw new Error(`Failed to load photos (${response.status})`);
+  }
+  const data: PicsumPhoto[] = await response.json();
+  return data.map((photo) => ({
+    id: photo.id,
+    author: photo.author,
+    downloadUrl: photo.download_url,
+  }));
+}
+
+export function usePhotos(limit = 20) {
+  return useQuery({
+    queryKey: photoKeys.list(limit),
+    queryFn: ({ signal }) => fetchPhotos(limit, signal),
+  });
+}
+```
+
+Map the raw API payload to an app-facing type inside the fetcher (as above), so components never
+see the wire format. See `src/hooks/use-photos.ts` for the full example, and
+`src/app/(tabs)/explore.tsx` for consuming it with pull-to-refresh and loading/error/empty states
+via `isPending`, `isError`, `refetch`, and `isRefetching`.

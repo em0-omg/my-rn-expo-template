@@ -7,12 +7,13 @@
     "icon": "./assets/images/icon.png",
     "scheme": "reactnativeexpotemplate",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "CFBundleAllowMixedLocalizations": true
-      }
+        "CFBundleAllowMixedLocalizations": true,
+        "CFBundleLocalizations": ["en", "ja"]
+      },
+      "bundleIdentifier": "com.anonymous.reactnativeexpotemplate"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,8 +22,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.reactnativeexpotemplate"
     },
     "web": {
       "output": "static",
@@ -55,7 +56,12 @@
             "android": ["en", "ja"]
           }
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-web-browser",
+      "expo-status-bar",
+      "@react-native-vector-icons/material-icons"
     ],
     "experiments": {
       "typedRoutes": true,
