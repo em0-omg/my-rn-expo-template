@@ -1,0 +1,23 @@
+appId: com.anonymous.reactnativeexpotemplate
+name: Tabs navigate and the counter keeps its state
+---
+- launchApp:
+    clearState: true
+
+# The Explore tab holds the FlashList gallery and the Zustand counter.
+- tapOn:
+    id: 'explore-tab'
+- assertVisible: 'Photo Gallery'
+- assertVisible: 'Counter: 0'
+
+- tapOn:
+    id: 'counter-increment'
+- assertVisible: 'Counter: 1'
+
+# Zustand state is shared, so it survives leaving and re-entering the tab.
+- tapOn:
+    id: 'home-tab'
+- assertVisible: 'Hello World'
+- tapOn:
+    id: 'explore-tab'
+- assertVisible: 'Counter: 1'

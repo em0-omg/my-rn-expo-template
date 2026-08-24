@@ -29,6 +29,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: t('tabs.home'),
+          tabBarButtonTestID: 'home-tab',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
@@ -36,6 +37,7 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: t('tabs.explore'),
+          tabBarButtonTestID: 'explore-tab',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />

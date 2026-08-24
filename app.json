@@ -13,7 +13,7 @@
         "CFBundleAllowMixedLocalizations": true,
         "CFBundleLocalizations": ["en", "ja"]
       },
-      "bundleIdentifier": "com.anonymous.react-native-expo-template"
+      "bundleIdentifier": "com.anonymous.reactnativeexpotemplate"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +22,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.reactnativeexpotemplate"
     },
     "web": {
       "output": "static",
@@ -59,7 +60,8 @@
       "expo-font",
       "expo-image",
       "expo-web-browser",
-      "expo-status-bar"
+      "expo-status-bar",
+      "@react-native-vector-icons/material-icons"
     ],
     "experiments": {
       "typedRoutes": true,

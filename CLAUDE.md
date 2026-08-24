@@ -22,6 +22,9 @@ npm run lint
 # Type check (also runs on pre-push via lefthook)
 npm run typecheck
 
+# Run unit tests (also runs on pre-push via lefthook)
+npm test
+
 # Format code
 npm run format
 
@@ -38,12 +41,15 @@ This is an Expo SDK 57 project using React Native 0.86 with file-based routing v
 - **Core**: Expo SDK 57, React Native 0.86, React 19.2, TypeScript 6.0
 - **Routing**: expo-router (file-based routing with typed routes)
 - **Styling**: NativeWind 4.2 + Tailwind CSS 3.4
-- **State Management**: Zustand 5.0 + AsyncStorage (persistent storage)
+- **Client State**: Zustand 5.0 + AsyncStorage (persistent storage)
+- **Server State**: TanStack Query 5.102 (remote data fetching, caching, refetch)
 - **Lists**: @shopify/flash-list 2.0 (high-performance list component)
 - **Images**: expo-image (blurhash placeholders, caching, transitions)
+- **Icons**: @react-native-vector-icons/material-icons (Android/web fallback for `IconSymbol`)
 - **i18n**: i18n-js + expo-localization
 - **Navigation**: bundled with expo-router (import from `expo-router/react-navigation`)
 - **Animation**: react-native-reanimated, react-native-gesture-handler
+- **Testing**: Jest (`jest-expo` preset) + @testing-library/react-native 14 (unit/component), Maestro (E2E)
 - **Dev Tools**: ESLint, Prettier, Lefthook (Git hooks)
 
 ### Version policy
@@ -74,7 +80,8 @@ src/
 │   └── theme.ts   # Design system configuration
 ├── hooks/         # Custom React hooks
 ├── lib/           # Library configurations
-│   └── i18n.ts    # Internationalization setup
+│   ├── i18n.ts         # Internationalization setup
+│   └── query-client.ts # TanStack Query client + AppState focus bridge
 ├── locales/       # Translation files (en.ts, ja.ts)
 └── stores/        # Zustand stores
     ├── app-store.ts     # App-wide state (initialization, user, loading)
@@ -106,6 +113,9 @@ import { useAppStore } from '@/stores';
 - `components/ui/icon-symbol.tsx` (fallback) uses MaterialIcons
 - `hooks/use-color-scheme.web.ts` vs `hooks/use-color-scheme.ts`
 
+`icon-symbol.tsx` imports `@react-native-vector-icons/material-icons` from its package root, not
+`/static` — the root entry bundles the font file, so icons also render in Expo Go.
+
 **NativeWind Styling**: Use Tailwind CSS classes with NativeWind
 
 ```tsx
@@ -131,6 +141,29 @@ export const useCounterStore = create<CounterStore>()(
   )
 );
 ```
+
+**Server State (TanStack Query)**: Zustand owns client state; TanStack Query owns anything fetched
+from a remote API — don't copy fetched data into a Zustand store. `src/lib/query-client.ts` exports
+the shared `queryClient` (wired up via `QueryClientProvider` in the root layout) and
+`subscribeToAppStateFocus()`, which bridges React Native's `AppState` into React Query's
+`focusManager` since its default focus detection is web-only.
+
+```tsx
+export const photoKeys = {
+  all: ['photos'] as const,
+  list: (limit: number) => [...photoKeys.all, 'list', limit] as const,
+};
+
+export function usePhotos(limit = 20) {
+  return useQuery({
+    queryKey: photoKeys.list(limit),
+    queryFn: ({ signal }) => fetchPhotos(limit, signal), // AbortSignal cancels in-flight requests
+  });
+}
+```
+
+See `src/hooks/use-photos.ts` for the full example and `.claude/rules/state-management-rule.md`
+for the client/server state split.
 
 **Theming**: Color scheme handling flows through:
 
@@ -195,6 +228,17 @@ import { Image } from 'expo-image';
 The New Architecture is mandatory from SDK 55 on, so `newArchEnabled` (and `edgeToEdgeEnabled`) are
 no longer valid keys in `app.json`.
 
+### Testing
+
+- **Unit/component**: Jest (`jest-expo` preset) + `@testing-library/react-native` — run with
+  `npm test`. RNTL v14's `render`, `renderHook`, `fireEvent`, and `act` are async and must be
+  `await`ed; matchers like `toBeOnTheScreen` register automatically (no `extend-expect` import).
+- **E2E**: Maestro flows in `.maestro/`, keyed by `testID` — requires the Maestro CLI and runs
+  against a built app, not Expo Go.
+- CI (`.github/workflows/ci.yml`) and `lefthook.yml` both run lint, typecheck, and tests.
+
+See `.claude/rules/testing-rule.md` for details.
+
 ### Design System
 
 This project uses an Anthropic-inspired design system:
@@ -210,6 +254,7 @@ See `.claude/rules/design-system-rule.md` for detailed guidelines.
 Additional development rules are located in `.claude/rules/`:
 
 - `design-system-rule.md` - Color palette, typography, spacing, components
-- `state-management-rule.md` - Zustand patterns and best practices
+- `state-management-rule.md` - Zustand and TanStack Query patterns and best practices
 - `i18n-rule.md` - Internationalization guidelines
 - `styling-rule.md` - NativeWind/Tailwind styling conventions
+- `testing-rule.md` - Jest/Testing Library unit tests and Maestro E2E conventions

@@ -1,6 +1,8 @@
 // Fallback for using MaterialIcons on Android and web.
 
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+// The root entry bundles the font file, so icons also render in Expo Go. The
+// `/static` entry omits it and needs the font registered by a native build.
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { SymbolWeight, type SFSymbol } from 'expo-symbols';
 import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';

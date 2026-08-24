@@ -9,10 +9,12 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 - **多言語対応 (i18n)** - expo-localization + i18n-js による国際化
 - **ダークモード対応** - システム設定に連動したテーマ切り替え
 - **NativeWind** - Tailwind CSS によるスタイリング
-- **Zustand** - 軽量な状態管理 + AsyncStorage による永続化
+- **Zustand** - 軽量なクライアント状態管理 + AsyncStorage による永続化
+- **TanStack Query** - サーバー状態管理（フェッチ・キャッシュ・自動再検証）
 - **New Architecture** - React Native の新アーキテクチャ有効
 - **React Compiler** - 自動最適化による高パフォーマンス
 - **型安全なルーティング** - TypeScript による型付きルート
+- **テスト** - Jest + Testing Library によるユニットテスト、Maestro による E2E テスト
 - **コード品質ツール** - ESLint + Prettier + Lefthook
 
 ## 技術スタック
@@ -36,10 +38,20 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 
 ### 状態管理
 
-| ライブラリ   | バージョン | 用途                     |
-| ------------ | ---------- | ------------------------ |
-| Zustand      | ^5.0       | 軽量な状態管理           |
-| AsyncStorage | 2.2        | ローカル永続化ストレージ |
+| ライブラリ   | バージョン | 用途                       |
+| ------------ | ---------- | -------------------------- |
+| Zustand      | ^5.0       | 軽量なクライアント状態管理 |
+| AsyncStorage | 2.2        | ローカル永続化ストレージ   |
+
+### サーバー状態 (TanStack Query)
+
+| ライブラリ            | バージョン | 用途                                         |
+| --------------------- | ---------- | -------------------------------------------- |
+| @tanstack/react-query | ^5.102     | リモートデータのフェッチ・キャッシュ・再検証 |
+
+Zustand は**クライアント状態**（UI・ユーザー設定・ローカルデータ）を、TanStack Query は**サーバー状態**
+（API から取得したデータ）を担当します。フェッチしたデータを Zustand ストアにコピーしないでください。
+詳細は `.claude/rules/state-management-rule.md` を参照してください。
 
 ### 国際化
 
@@ -57,12 +69,24 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 
 ### ナビゲーション・UI
 
-| ライブラリ                   | バージョン | 用途                                 |
-| ---------------------------- | ---------- | ------------------------------------ |
-| expo-router/react-navigation | ~57.0      | ナビゲーション（expo-router に同梱） |
-| react-native-reanimated      | ~4.5       | アニメーション                       |
-| react-native-gesture-handler | ~2.32      | ジェスチャー                         |
-| expo-haptics                 | ~57.0      | 触覚フィードバック                   |
+| ライブラリ                                | バージョン | 用途                                      |
+| ----------------------------------------- | ---------- | ----------------------------------------- |
+| expo-router/react-navigation              | ~57.0      | ナビゲーション（expo-router に同梱）      |
+| react-native-reanimated                   | ~4.5       | アニメーション                            |
+| react-native-gesture-handler              | ~2.32      | ジェスチャー                              |
+| expo-haptics                              | ~57.0      | 触覚フィードバック                        |
+| @react-native-vector-icons/material-icons | ^13.1      | アイコン（Android/Web、Expo Go でも動作） |
+
+### テスト
+
+| ライブラリ                    | バージョン       | 用途                                 |
+| ----------------------------- | ---------------- | ------------------------------------ |
+| jest-expo                     | ~57.0            | Jest プリセット（Expo 向け）         |
+| Jest                          | ~29.7            | テストランナー                       |
+| @testing-library/react-native | ^14.0            | コンポーネント・フックのテスト       |
+| Maestro                       | 別途インストール | E2E テスト（ビルド済みアプリが対象） |
+
+詳細は `.claude/rules/testing-rule.md` を参照してください。
 
 ### 開発ツール
 
@@ -74,6 +98,10 @@ React Native + Expo を使用したモバイルアプリケーション開発の
 
 > ESLint 9 系は EOL ですが、`eslint-config-expo` が依存する `eslint-plugin-react` が ESLint 10 に
 > 未対応のため、Expo エコシステムが追随するまで 9 系を維持します。
+>
+> `.github/workflows/ci.yml` は `main` への PR・push で lint・typecheck・フォーマットチェック・
+> テストを実行します。`lefthook.yml` により、ローカルでも pre-commit で lint/format、pre-push で
+> typecheck/test が自動実行されます。
 
 ## ディレクトリ構成
 
@@ -93,9 +121,11 @@ src/
 ├── hooks/            # カスタムフック
 │   ├── use-color-scheme.ts   # カラースキーム検出
 │   ├── use-theme-color.ts    # テーマカラー取得
-│   └── use-translation.ts    # 翻訳フック
+│   ├── use-translation.ts    # 翻訳フック
+│   └── use-photos.ts         # TanStack Query の使用例
 ├── lib/              # ライブラリ設定
-│   └── i18n.ts       # 国際化設定
+│   ├── i18n.ts           # 国際化設定
+│   └── query-client.ts   # TanStack Query クライアント設定
 ├── locales/          # 翻訳ファイル
 │   ├── en.ts         # 英語
 │   ├── ja.ts         # 日本語
@@ -170,7 +200,8 @@ function MyComponent() {
 
 ### 状態管理 (Zustand)
 
-Zustand を使用した状態管理の例：
+Zustand はクライアント状態（UI・ユーザー設定・ローカルデータ）を担当します。API から取得したデータは
+Zustand ストアにコピーせず、TanStack Query に任せてください（後述）。
 
 ```tsx
 import { useCounterStore, useAppStore } from '@/stores';
@@ -190,6 +221,41 @@ function App() {
   // アプリ初期化処理...
 }
 ```
+
+詳細は `.claude/rules/state-management-rule.md` を参照してください。
+
+### サーバー状態管理 (TanStack Query)
+
+`src/lib/query-client.ts` で作成した `queryClient` をルートレイアウトの `QueryClientProvider` に渡し、
+`subscribeToAppStateFocus()` で React Native の `AppState` を React Query の `focusManager` に橋渡しし
+ます（React Query 標準のフォーカス検出は Web 専用のため）。
+
+```tsx
+// src/app/_layout.tsx
+useEffect(subscribeToAppStateFocus, []);
+
+<QueryClientProvider client={queryClient}>{/* ... */}</QueryClientProvider>;
+```
+
+クエリキーはファクトリ関数でまとめ、フェッチ関数には `useQuery` が渡す `AbortSignal` をそのまま渡し
+てリクエストをキャンセル可能にします。
+
+```typescript
+export const photoKeys = {
+  all: ['photos'] as const,
+  list: (limit: number) => [...photoKeys.all, 'list', limit] as const,
+};
+
+export function usePhotos(limit = 20) {
+  return useQuery({
+    queryKey: photoKeys.list(limit),
+    queryFn: ({ signal }) => fetchPhotos(limit, signal),
+  });
+}
+```
+
+画面側では `isPending` / `isError` / `refetch` / `isRefetching` でローディング・エラー・
+プルリフレッシュを表現します（`src/app/(tabs)/explore.tsx` を参照）。
 
 ### スタイリング (NativeWind)
 
@@ -300,6 +366,31 @@ component.android.tsx # Android 専用
 component.web.ts     # Web 専用
 ```
 
+### テスト
+
+ユニットテストは `__tests__/` ディレクトリにコードと並べて配置し、`npm test` で実行します。
+
+```tsx
+import { render, screen } from '@testing-library/react-native';
+
+it('renders its children', async () => {
+  // @testing-library/react-native v14 では render/renderHook/fireEvent/act が
+  // すべて非同期になったため、必ず await します。
+  await render(<ThemedText>Hello</ThemedText>);
+  expect(screen.getByText('Hello')).toBeOnTheScreen();
+});
+```
+
+TanStack Query を使うフックのテストは、アプリ共有の `queryClient` ではなく
+`retry: false` / `gcTime: 0` を指定したテスト用の `QueryClient` を作成します
+（`src/hooks/__tests__/use-photos.test.tsx` を参照）。
+
+E2E テストは Maestro で `.maestro/*.yaml` に記述し、`testID` で要素を指定します。
+[Maestro CLI](https://maestro.mobile.dev/) を別途インストールし、ビルド済みアプリ（Expo Go では
+不可）に対して実行します。
+
+詳細は `.claude/rules/testing-rule.md` を参照してください。
+
 ## コマンド
 
 | コマンド                | 説明                         |
@@ -310,6 +401,7 @@ component.web.ts     # Web 専用
 | `npm run web`           | Web ブラウザで起動           |
 | `npm run lint`          | ESLint でコードチェック      |
 | `npm run typecheck`     | TypeScript で型チェック      |
+| `npm test`              | ユニットテストを実行         |
 | `npm run format`        | Prettier でコード整形        |
 | `npm run reset-project` | プロジェクトを初期化         |
 
@@ -341,5 +433,8 @@ npm run reset-project
 - [Expo Localization](https://docs.expo.dev/versions/latest/sdk/localization/)
 - [NativeWind](https://www.nativewind.dev/)
 - [Zustand](https://zustand-demo.pmnd.rs/)
+- [TanStack Query](https://tanstack.com/query/latest)
 - [FlashList](https://shopify.github.io/flash-list/docs/)
 - [expo-image](https://docs.expo.dev/versions/latest/sdk/image/)
+- [Testing Library (React Native)](https://callstack.github.io/react-native-testing-library/)
+- [Maestro](https://maestro.mobile.dev/)
